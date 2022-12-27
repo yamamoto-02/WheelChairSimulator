@@ -18,7 +18,6 @@ public class PlayerController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        //if (rig == null) rig = GetComponent<Rigidbody>();
         sw = new StreamWriter(@"result.csv",true,Encoding.GetEncoding("Shift_JIS"));
         string[] s1 ={"time","x","y","key_input"};
         string s2 = string.Join(",",s1);
@@ -61,7 +60,7 @@ public class PlayerController : MonoBehaviour
     public Vector2 GetCombinedGazeScreenPosition()
     {
         //Get combined gaze
-        Vector3 ray = hmd.GetCombinedGazeRay().value.direction;
+        Vector3 ray = FoveManager.GetHmdCombinedGazeRay().value.direction;
 
         //Get projection matrix
         Matrix44 l = FoveManager.Headset.GetProjectionMatricesLH(0.001f,1000.0f).value.left;
@@ -78,11 +77,20 @@ public class PlayerController : MonoBehaviour
         var get_key_input = GetKeyInput();
         Debug.Log("ScreenVector2: " + outPos.ToString() + ",GazeVector3: " + ray.ToString() + "ray_x:" + ray_x.ToString() + "time:" + elapsed_time.ToString());
 
-        if(ray_x<0.1 && -0.1<ray_x)
-        //if(Input.GetKey(KeyCode.W) == true)
+        if(ray_x<=0.2 && -0.2<=ray_x)
         {
-            //rig.AddForce(transform.forward * move_power,ForceMode.Force);
             transform.position += transform.forward * movementSpeed;
+        }
+        else if(ray_x<=1.0 && 0.2<ray_x)
+        {
+            transform.Rotate (Vector3.up, amountOfRotation);
+        }
+        else if (ray_x<-0.2 && -1.0<=ray_x) 
+        {
+            transform.Rotate (Vector3.up, -amountOfRotation);
+        }
+        else{
+
         }
 
         ResultData(elapsed_time.ToString(),ray_x.ToString(),ray_y.ToString(),get_key_input.ToString());
